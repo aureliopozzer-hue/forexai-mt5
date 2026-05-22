@@ -91,7 +91,7 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     "mt5_server": "",
     "mt5_path": r"C:\Program Files\MetaTrader 5\terminal64.exe",
     "supabase_url": os.environ.get("SUPABASE_URL", "https://cmcnenrtnxnfmkxhsqyp.supabase.co"),
-    "supabase_key": os.environ.get("SUPABASE_KEY", ""),
+    "supabase_key": os.environ.get("SUPABASE_KEY", os.environ.get("SUPABASE_SERVICE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtY25lbnJ0bnhuZm1reGhzcXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MzQ4MjksImV4cCI6MjA5MzUxMDgyOX0.LZYPclKKZavvU-drFxMRElTyyoPCg5-sNOYsSzcGWS0")),
 }
 
 # ---------------------------------------------------------------------------
