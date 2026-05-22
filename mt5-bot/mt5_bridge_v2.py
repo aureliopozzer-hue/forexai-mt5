@@ -12,6 +12,8 @@ import os
 import sys
 import json
 import logging
+import threading
+import time
 import traceback
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -170,6 +172,207 @@ def update_supabase_signal(signal_id: str, status: str, ticket: Optional[int] = 
             logger.info("Supabase signal %s updated -> %s (HTTP %s)", signal_id, status, resp.status)
     except Exception as exc:
         logger.error("Failed to update Supabase signal %s: %s", signal_id, str(exc))
+
+
+def fetch_supabase_config() -> Optional[Dict[str, Any]]:
+    """Fetch broker credentials and risk management settings from Supabase mt5_config table."""
+    config = load_config()
+    supabase_url = config.get("supabase_url", "")
+    supabase_key = config.get("supabase_key", "")
+    if not supabase_url or not supabase_key:
+        logger.warning("Supabase URL/key not configured – skipping config sync.")
+        return None
+
+    try:
+        import urllib.request
+        import urllib.error
+
+        url = "%s/rest/v1/mt5_config?select=*&limit=1&order=updated_at.desc" % supabase_url
+        req = urllib.request.Request(
+            url,
+            method="GET",
+            headers={
+                "apikey": supabase_key,
+                "Authorization": "Bearer %s" % supabase_key,
+                "Content-Type": "application/json",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            if isinstance(data, list) and len(data) > 0:
+                return data[0]
+            return None
+    except Exception as exc:
+        logger.error("Failed to fetch Supabase config: %s", str(exc))
+        return None
+
+
+# Track last known Supabase credentials to detect changes
+_last_supabase_login: int = 0
+_last_supabase_server: str = ""
+
+
+def sync_credentials_from_supabase() -> bool:
+    """Sync broker credentials from Supabase. Returns True if credentials changed and MT5 needs reconnection."""
+    global _last_supabase_login, _last_supabase_server
+
+    supabase_config = fetch_supabase_config()
+    if not supabase_config:
+        return False
+
+    # Read broker credentials from Supabase columns
+    login = int(supabase_config.get("broker_login", 0))
+    password = str(supabase_config.get("broker_password", ""))
+    server = str(supabase_config.get("broker_server", ""))
+    account_type = str(supabase_config.get("account_type", "demo"))
+
+    if not login or not password or not server:
+        logger.debug("No broker credentials found in Supabase config.")
+        return False
+
+    # Check if credentials changed
+    credentials_changed = (login != _last_supabase_login or server != _last_supabase_server)
+
+    if credentials_changed:
+        logger.info(
+            "Broker credentials updated in Supabase: login=%d server=%s (was login=%d server=%s)",
+            login, server, _last_supabase_login, _last_supabase_server,
+        )
+        _last_supabase_login = login
+        _last_supabase_server = server
+
+    # Always update local config with Supabase credentials
+    local_config = load_config()
+    local_config["mt5_login"] = login
+    local_config["mt5_password"] = password
+    local_config["mt5_server"] = server
+    local_config["account_type"] = account_type
+
+    # Also sync risk management settings from Supabase
+    profit_target = float(supabase_config.get("profit_target", 0))
+    loss_limit = float(supabase_config.get("loss_limit", 0))
+    lot_type = str(supabase_config.get("lot_type", "fixed"))
+    fixed_lot = float(supabase_config.get("fixed_lot", 0.01))
+    lot_percentage = float(supabase_config.get("lot_percentage", 1.0))
+    auto_trading = bool(supabase_config.get("auto_trading_enabled", False))
+
+    local_config["daily_profit_target"] = profit_target
+    local_config["daily_loss_limit"] = loss_limit
+    local_config["lot_sizing_mode"] = lot_type
+    local_config["fixed_lot_size"] = fixed_lot
+    local_config["risk_per_trade_pct"] = lot_percentage
+    local_config["auto_trading_enabled"] = auto_trading
+
+    save_config(local_config)
+
+    return credentials_changed
+
+
+def update_supabase_bot_status():
+    """Update the mt5_bot_status table in Supabase with current bridge status."""
+    config = load_config()
+    supabase_url = config.get("supabase_url", "")
+    supabase_key = config.get("supabase_key", "")
+    if not supabase_url or not supabase_key:
+        return
+
+    mt5_connected = False
+    account_balance = 0
+    account_equity = 0
+    account_leverage = 0
+    account_currency = "USD"
+    open_positions_count = 0
+    mt5_login = config.get("mt5_login", 0)
+    mt5_server = config.get("mt5_server", "")
+    mt5_account_type = config.get("account_type", "demo")
+
+    if MT5_AVAILABLE and mt5 is not None:
+        info = mt5.account_info()
+        if info is not None:
+            mt5_connected = True
+            account_balance = info.balance
+            account_equity = info.equity
+            account_leverage = info.leverage
+            account_currency = info.currency
+            mt5_login = info.login
+            mt5_server = info.server
+            open_positions_count = len(get_open_positions())
+
+    now = datetime.utcnow().isoformat() + "Z"
+
+    try:
+        import urllib.request
+        import urllib.error
+
+        # First check if a status row exists
+        url = "%s/rest/v1/mt5_bot_status?select=id&limit=1" % supabase_url
+        req = urllib.request.Request(
+            url,
+            method="GET",
+            headers={
+                "apikey": supabase_key,
+                "Authorization": "Bearer %s" % supabase_key,
+            },
+        )
+        existing_rows = None
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            existing_rows = json.loads(resp.read().decode("utf-8"))
+
+        payload = {
+            "connected": True,
+            "mt5_connected": mt5_connected,
+            "account_balance": account_balance,
+            "account_equity": account_equity,
+            "account_leverage": account_leverage,
+            "account_currency": account_currency,
+            "open_positions_count": open_positions_count,
+            "last_heartbeat": now,
+            "server_time": now,
+            "bot_version": "2.1.0-bridge",
+            "mt5_terminal_path": "Windows Bridge",
+            "mt5_login": mt5_login,
+            "mt5_server": mt5_server,
+            "mt5_account_type": mt5_account_type,
+            "updated_at": now,
+        }
+
+        if isinstance(existing_rows, list) and len(existing_rows) > 0:
+            # Update existing row
+            row_id = existing_rows[0].get("id", "")
+            url = "%s/rest/v1/mt5_bot_status?id=eq.%s" % (supabase_url, row_id)
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                method="PATCH",
+                headers={
+                    "apikey": supabase_key,
+                    "Authorization": "Bearer %s" % supabase_key,
+                    "Content-Type": "application/json",
+                    "Prefer": "return=minimal",
+                },
+            )
+        else:
+            # Create new row
+            payload["id"] = "default"
+            payload["created_at"] = now
+            url = "%s/rest/v1/mt5_bot_status" % supabase_url
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                method="POST",
+                headers={
+                    "apikey": supabase_key,
+                    "Authorization": "Bearer %s" % supabase_key,
+                    "Content-Type": "application/json",
+                    "Prefer": "return=minimal",
+                },
+            )
+
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            logger.debug("Bot status updated in Supabase (HTTP %s)", resp.status)
+
+    except Exception as exc:
+        logger.error("Failed to update Supabase bot status: %s", str(exc))
 
 # ---------------------------------------------------------------------------
 # Config helpers
@@ -1241,6 +1444,23 @@ def startup():
     else:
         logger.info("Account type: DEMO (safe mode)")
 
+    # Sync credentials from Supabase before MT5 init
+    logger.info("Syncing credentials from Supabase...")
+    try:
+        credentials_changed = sync_credentials_from_supabase()
+        if credentials_changed:
+            logger.info("Supabase credentials synced — will use updated credentials for MT5 login.")
+        else:
+            logger.info("Supabase credentials synced (no changes or not configured).")
+    except Exception as exc:
+        logger.warning("Supabase credential sync failed on startup: %s", str(exc))
+
+    # Send initial heartbeat to Supabase
+    try:
+        update_supabase_bot_status()
+    except Exception as exc:
+        logger.warning("Supabase bot status update failed on startup: %s", str(exc))
+
     # Initialize MT5
     if MT5_AVAILABLE:
         if init_mt5():
@@ -1273,122 +1493,78 @@ startup()
 
 @app.route("/sync-credentials", methods=["POST"])
 def sync_credentials():
-    """
-    Fetch broker credentials from Supabase and reconnect MT5.
-    
-    This endpoint is called when the user saves broker credentials
-    via the website. It reads the credentials from the mt5_config
-    table in Supabase and reconnects MT5 with the new credentials.
-    """
-    config = load_config()
-    supabase_url = config.get("supabase_url", "")
-    supabase_key = config.get("supabase_key", "")
-    
-    if not supabase_url or not supabase_key:
-        return jsonify({
-            "success": False,
-            "error": "Supabase not configured on bridge",
-        }), 500
-    
+    """Sync broker credentials from Supabase and reconnect MT5 if changed."""
     try:
-        import urllib.request
-        import urllib.error
-        
-        # Fetch config from Supabase
-        url = "%s/rest/v1/mt5_config?select=broker_login,broker_password,broker_server,account_type&limit=1" % supabase_url
-        req = urllib.request.Request(
-            url,
-            headers={
-                "apikey": supabase_key,
-                "Authorization": "Bearer %s" % supabase_key,
-            },
-        )
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            rows = json.loads(resp.read().decode("utf-8"))
-        
-        if not rows:
+        credentials_changed = sync_credentials_from_supabase()
+
+        if credentials_changed:
+            # Reconnect MT5 with new credentials
+            result = init_mt5()
+            if result:
+                return jsonify({
+                    "success": True,
+                    "message": "Credentials synced and MT5 reconnected successfully",
+                    "reconnected": True,
+                })
+            else:
+                return jsonify({
+                    "success": True,
+                    "message": "Credentials synced but MT5 reconnection failed",
+                    "reconnected": False,
+                })
+        else:
             return jsonify({
-                "success": False,
-                "error": "No config row found in Supabase",
-            }), 404
-        
-        row = rows[0]
-        login = row.get("broker_login", 0)
-        password = row.get("broker_password", "")
-        server = row.get("broker_server", "")
-        account_type = row.get("account_type", "demo")
-        
-        if not login or not password or not server:
-            return jsonify({
-                "success": False,
-                "error": "Broker credentials not set in Supabase (broker_login, broker_password, broker_server)",
-                "has_login": bool(login),
-                "has_password": bool(password),
-                "has_server": bool(server),
-            }), 400
-        
-        logger.info("Synced credentials from Supabase: login=%s server=%s type=%s", login, server, account_type)
-        
-        # Update local config
-        config["mt5_login"] = login
-        config["mt5_password"] = password
-        config["mt5_server"] = server
-        config["account_type"] = account_type
-        save_config(config)
-        
-        # Reconnect MT5 with new credentials
-        if not MT5_AVAILABLE or mt5 is None:
-            return jsonify({
-                "success": False,
-                "error": "MT5 not available on this system",
-                "credentials_saved": True,
-            }), 503
-        
-        # Shutdown existing connection
-        try:
-            mt5.shutdown()
-        except Exception:
-            pass
-        
-        # Initialize and login
-        path = config.get("mt5_path", r"C:\Program Files\MetaTrader 5\terminal64.exe")
-        if not mt5.initialize(path=path):
-            err = mt5.last_error()
-            return jsonify({
-                "success": False,
-                "error": "MT5 initialize failed: %s" % str(err),
-                "credentials_saved": True,
-            }), 500
-        
-        if not mt5.login(login=int(login), password=password, server=server):
-            err = mt5.last_error()
-            return jsonify({
-                "success": False,
-                "error": "MT5 login failed: %s" % str(err),
-                "credentials_saved": True,
-                "login": login,
-                "server": server,
-            }), 401
-        
-        # Success — get account info
-        account_info = get_mt5_account_info()
-        logger.info("MT5 reconnected with new credentials: login=%s server=%s", login, server)
-        
-        return jsonify({
-            "success": True,
-            "message": "MT5 connected with new broker credentials",
-            "login": login,
-            "server": server,
-            "account_type": account_type,
-            "account_info": account_info,
-        })
-    
+                "success": True,
+                "message": "Credentials synced (no changes detected)",
+                "reconnected": False,
+            })
     except Exception as exc:
-        logger.error("sync-credentials failed: %s", str(exc))
-        return jsonify({
-            "success": False,
-            "error": str(exc),
-        }), 500
+        logger.error("Error in sync-credentials: %s", str(exc))
+        return jsonify({"success": False, "error": str(exc)}), 500
+
+
+@app.route("/reconnect", methods=["POST"])
+def reconnect():
+    """Force MT5 reconnection with current config credentials."""
+    try:
+        result = init_mt5()
+        if result:
+            return jsonify({"success": True, "message": "MT5 reconnected successfully"})
+        else:
+            return jsonify({"success": False, "error": "MT5 reconnection failed"}), 500
+    except Exception as exc:
+        logger.error("Error in reconnect: %s", str(exc))
+        return jsonify({"success": False, "error": str(exc)}), 500
+
+
+# ---------------------------------------------------------------------------
+# Background Supabase sync thread
+# ---------------------------------------------------------------------------
+def _supabase_sync_loop():
+    """Background thread that periodically syncs credentials and sends heartbeats."""
+    time.sleep(5)  # Wait for Flask to start
+    logger.info("Supabase sync thread started (30s interval)")
+
+    while True:
+        try:
+            # Sync credentials from Supabase
+            credentials_changed = sync_credentials_from_supabase()
+            if credentials_changed:
+                logger.info("Credentials changed in Supabase — reconnecting MT5...")
+                init_mt5()
+
+            # Send heartbeat to Supabase
+            update_supabase_bot_status()
+
+        except Exception as exc:
+            logger.error("Error in Supabase sync loop: %s", str(exc))
+
+        time.sleep(30)  # Sync every 30 seconds
+
+
+# Start background sync thread
+_sync_thread = threading.Thread(target=_supabase_sync_loop, daemon=True)
+_sync_thread.start()
 
 
 if __name__ == "__main__":
