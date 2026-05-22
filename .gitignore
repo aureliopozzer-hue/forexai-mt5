@@ -20,6 +20,7 @@ server-restart.log
 examples/
 instagram-content/
 scripts/
+!scripts/vercel-build.mjs
 after-analisar*.png
 dashboard.png
 login-modal.png
