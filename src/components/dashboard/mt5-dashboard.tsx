@@ -33,34 +33,27 @@ import {
 
 interface MT5Config {
   id: string;
-  userId: string;
-  isActive: boolean;
-  authToken: string;
-  lotSize: number;
-  maxLotSize: number;
-  maxRiskPercent: number;
-  maxDailyTrades: number;
-  maxDrawdown: number;
-  allowedPairs: string;
-  botStatus: string;
-  lastHeartbeat: string | null;
-  mt5Account: string | null;
-  mt5Broker: string | null;
-  mt5Balance: number | null;
-  mt5Equity: number | null;
-  mt5Leverage: number | null;
-  mt5Currency: string | null;
-  botVersion: string | null;
-  createdAt: string;
-  updatedAt: string;
+  auto_trading_enabled: boolean;
+  max_lot_size: number;
+  risk_per_trade_pct: number;
+  allowed_symbols: string[];
+  max_open_positions: number;
+  min_confidence: number;
+  strategy_filter: string[];
+  stop_loss_default_pips: number;
+  take_profit_default_pips: number;
+  trading_hours_start: string;
+  trading_hours_end: string;
+  updated_at: string | null;
 
-  // Broker connection fields (from backend mt5_config)
+  // Broker connection fields
   mt5_login?: number | null;
   mt5_password?: string | null;
   mt5_server?: string | null;
   mt5_account_type?: 'demo' | 'live' | null;
+  mt5_connected?: boolean;
 
-  // Risk management fields (from backend mt5_config)
+  // Risk management fields
   profit_target?: number | null;
   loss_limit?: number | null;
   lot_type?: 'fixed' | 'percentage' | null;
@@ -1134,11 +1127,16 @@ function ConfigTab({
   const [lastConfigId, setLastConfigId] = useState<string | null>(null);
   if (config && config.id !== lastConfigId) {
     setLastConfigId(config.id);
-    setIsActive(config.isActive);
-    setLotSize(config.lotSize);
-    setRiskPercent(config.maxRiskPercent);
-    setMaxPositions(config.maxDailyTrades);
-    setAllowedSymbols(config.allowedPairs);
+    setIsActive(config.auto_trading_enabled ?? false);
+    setLotSize(config.max_lot_size ?? 0.01);
+    setRiskPercent(config.risk_per_trade_pct ?? 2);
+    setMaxPositions(config.max_open_positions ?? 5);
+    setMinConfidence(config.min_confidence ?? 65);
+    setDefaultSL(config.stop_loss_default_pips ?? 50);
+    setDefaultTP(config.take_profit_default_pips ?? 100);
+    setTradingStart(config.trading_hours_start ?? '08:00');
+    setTradingEnd(config.trading_hours_end ?? '20:00');
+    setAllowedSymbols(Array.isArray(config.allowed_symbols) ? config.allowed_symbols.join(', ') : (config.allowed_symbols || ''));
   }
   // Sync isActive from status
   const [lastIsActive, setLastIsActive] = useState<boolean | undefined>(undefined);
@@ -1164,14 +1162,19 @@ function ConfigTab({
 
   const handleSave = useCallback(() => {
     onSave({
-      isActive,
-      lotSize,
-      maxRiskPercent: riskPercent,
-      maxDailyTrades: maxPositions,
-      allowedPairs: allowedSymbols,
+      auto_trading_enabled: isActive,
+      max_lot_size: lotSize,
+      risk_per_trade_pct: riskPercent,
+      max_open_positions: maxPositions,
+      min_confidence: minConfidence,
+      stop_loss_default_pips: defaultSL,
+      take_profit_default_pips: defaultTP,
+      trading_hours_start: tradingStart,
+      trading_hours_end: tradingEnd,
+      allowed_symbols: allowedSymbols.split(',').map(s => s.trim().toUpperCase()).filter(Boolean),
     });
     toast.success('Configuration saved', { description: 'Your MT5 auto-trading settings have been updated.' });
-  }, [isActive, lotSize, riskPercent, maxPositions, allowedSymbols, onSave]);
+  }, [isActive, lotSize, riskPercent, maxPositions, minConfidence, defaultSL, defaultTP, tradingStart, tradingEnd, allowedSymbols, onSave]);
 
   return (
     <div className="space-y-4">
@@ -1998,15 +2001,77 @@ export function MT5Dashboard() {
       }
       if (statusRes.status === 'fulfilled') {
         const json = await statusRes.value.json();
-        if (json.success && json.data) setStatus(json.data);
+        if (json.success && json.data) {
+          const d = json.data;
+          // Map API snake_case to frontend camelCase
+          setStatus({
+            botStatus: d.connected ? 'online' : (d.mt5_connected ? 'connecting' : 'offline'),
+            lastHeartbeat: d.last_heartbeat ?? null,
+            mt5Account: d.mt5_login != null ? String(d.mt5_login) : null,
+            mt5Broker: d.mt5_server ?? null,
+            mt5Balance: d.account_balance ?? null,
+            mt5Equity: d.account_equity ?? null,
+            mt5Leverage: d.account_leverage ?? null,
+            mt5Currency: d.account_currency ?? null,
+            isActive: d.connected ?? false,
+            botVersion: d.bot_version ?? null,
+            openPositions: d.open_positions_count ?? 0,
+            mt5_connected: d.mt5_connected ?? false,
+            mt5_login: d.mt5_login ?? null,
+            mt5_server: d.mt5_server ?? null,
+            mt5_account_type: d.mt5_account_type ?? null,
+            isStale: d.isStale ?? false,
+            lastHeartbeatAge: d.lastHeartbeatAge ?? null,
+          });
+        }
       }
       if (positionsRes.status === 'fulfilled') {
         const json = await positionsRes.value.json();
-        if (json.success && json.data) setPositions(json.data);
+        if (json.success && json.data) {
+          // Map API snake_case to frontend camelCase
+          setPositions(json.data.map((p: any) => ({
+            id: p.id,
+            signalId: p.signal_id ?? null,
+            mt5Ticket: p.ticket ?? 0,
+            pair: p.symbol ?? '',
+            direction: p.direction ?? 'BUY',
+            lotSize: p.lot_size ?? 0,
+            openPrice: p.entry_price ?? 0,
+            currentPrice: p.current_price ?? null,
+            stopLoss: p.stop_loss ?? null,
+            takeProfit: p.take_profit ?? null,
+            profit: p.profit ?? null,
+            profitPips: p.profit_pips ?? null,
+            swap: null,
+            openTime: p.open_time ?? '',
+          })));
+        }
       }
       if (signalsRes.status === 'fulfilled') {
         const json = await signalsRes.value.json();
-        if (json.success && json.data) setSignals(json.data);
+        if (json.success && json.data) {
+          // Map API snake_case to frontend camelCase
+          setSignals(json.data.map((s: any) => ({
+            id: s.id,
+            pair: s.symbol ?? '',
+            direction: s.direction ?? 'BUY',
+            entry: String(s.entry_price ?? 0),
+            stopLoss: String(s.stop_loss ?? 0),
+            takeProfit: String(s.take_profit ?? 0),
+            probability: s.confidence ?? 0,
+            strategy: s.strategy ?? '',
+            timeframe: '',
+            status: s.status ?? 'pending',
+            source: 'AI',
+            mt5Ticket: s.mt5_ticket ?? null,
+            executedAt: s.executed_at ?? null,
+            executionPrice: null,
+            executionLot: s.executed_lot ?? null,
+            errorMessage: s.error_message ?? null,
+            createdAt: s.created_at ?? '',
+            updatedAt: s.updated_at ?? '',
+          })));
+        }
       }
 
       setError(null);
@@ -2029,13 +2094,50 @@ export function MT5Dashboard() {
 
       if (statusRes.status === 'fulfilled') {
         const json = await statusRes.value.json();
-        if (json.success && json.data) setStatus(json.data);
+        if (json.success && json.data) {
+          const d = json.data;
+          setStatus({
+            botStatus: d.connected ? 'online' : (d.mt5_connected ? 'connecting' : 'offline'),
+            lastHeartbeat: d.last_heartbeat ?? null,
+            mt5Account: d.mt5_login != null ? String(d.mt5_login) : null,
+            mt5Broker: d.mt5_server ?? null,
+            mt5Balance: d.account_balance ?? null,
+            mt5Equity: d.account_equity ?? null,
+            mt5Leverage: d.account_leverage ?? null,
+            mt5Currency: d.account_currency ?? null,
+            isActive: d.connected ?? false,
+            botVersion: d.bot_version ?? null,
+            openPositions: d.open_positions_count ?? 0,
+            mt5_connected: d.mt5_connected ?? false,
+            mt5_login: d.mt5_login ?? null,
+            mt5_server: d.mt5_server ?? null,
+            mt5_account_type: d.mt5_account_type ?? null,
+            isStale: d.isStale ?? false,
+            lastHeartbeatAge: d.lastHeartbeatAge ?? null,
+          });
+        }
       }
       if (positionsRes.status === 'fulfilled') {
         const json = await positionsRes.value.json();
-        if (json.success && json.data) setPositions(json.data);
+        if (json.success && json.data) {
+          setPositions(json.data.map((p: any) => ({
+            id: p.id,
+            signalId: p.signal_id ?? null,
+            mt5Ticket: p.ticket ?? 0,
+            pair: p.symbol ?? '',
+            direction: p.direction ?? 'BUY',
+            lotSize: p.lot_size ?? 0,
+            openPrice: p.entry_price ?? 0,
+            currentPrice: p.current_price ?? null,
+            stopLoss: p.stop_loss ?? null,
+            takeProfit: p.take_profit ?? null,
+            profit: p.profit ?? null,
+            profitPips: p.profit_pips ?? null,
+            swap: null,
+            openTime: p.open_time ?? '',
+          })));
+        }
       }
-
       setLastUpdated(new Date());
     } catch {
       // Silently ignore refresh errors
