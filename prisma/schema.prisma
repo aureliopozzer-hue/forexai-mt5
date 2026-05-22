@@ -1,0 +1,30 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ⚠️ Para deploy no Vercel (PostgreSQL/Supabase), altere:
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// E configure DATABASE_URL no painel do Vercel com a string do Supabase.
+
+model User {
+  id                   String   @id @default(cuid())
+  email                String   @unique
+  name                 String?
+  avatarUrl            String?
+  isPro                Boolean  @default(false)
+  credits              Int      @default(100)
+  stripeCustomerId     String?  @unique
+  stripeSubscriptionId String?
+  stripePriceId        String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}

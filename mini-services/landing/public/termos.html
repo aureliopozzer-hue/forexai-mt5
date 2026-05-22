@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Termos de Uso — ForexAI Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #0a0a0f;
+  --bg-light: #12121a;
+  --green: #00ff88;
+  --green-dim: #00cc6a;
+  --green-glow: rgba(0,255,136,0.3);
+  --gold: #ffd700;
+  --text: #e0e0e0;
+  --text-dim: #888;
+  --text-bright: #ffffff;
+  --border: rgba(255,255,255,0.1);
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+a { color: var(--green); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.container { max-width: 800px; margin: 0 auto; padding: 0 1.5rem; }
+
+.page-header {
+  padding: 6rem 1.5rem 3rem;
+  text-align: center;
+  position: relative;
+}
+.page-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--green), var(--gold));
+  border-radius: 2px;
+}
+.page-header h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--green), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+.page-header p { color: var(--text-dim); font-size: 0.95rem; }
+
+.content {
+  padding: 3rem 1.5rem 5rem;
+}
+.content h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-bright);
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  padding-left: 1rem;
+  border-left: 3px solid var(--green);
+}
+.content h2:first-child { margin-top: 0; }
+.content p {
+  margin-bottom: 1rem;
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+.content ul {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+  list-style: none;
+}
+.content ul li {
+  position: relative;
+  padding-left: 1.25rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+.content ul li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--green);
+  font-weight: 700;
+}
+
+.footer {
+  padding: 2rem 1.5rem;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+.footer-logo { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.75rem; }
+.footer-logo span {
+  background: linear-gradient(135deg, var(--green), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.footer-links a { font-size: 0.85rem; color: var(--text-dim); transition: color 0.3s ease; }
+.footer-links a:hover { color: var(--green); text-decoration: none; }
+.footer-made { font-size: 0.85rem; color: var(--text-dim); }
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  padding: 0.6rem 1.25rem;
+  background: rgba(0,255,136,0.1);
+  border: 1px solid rgba(0,255,136,0.2);
+  border-radius: 8px;
+  color: var(--green);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+.back-link:hover { background: rgba(0,255,136,0.15); text-decoration: none; }
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+
+@media (max-width: 768px) {
+  .content h2 { font-size: 1.2rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="container">
+    <h1>Termos de Uso</h1>
+    <p>Última atualização: Maio de 2025</p>
+  </div>
+</div>
+
+<div class="content">
+  <div class="container">
+    <a href="/" class="back-link">← Voltar ao Início</a>
+
+    <h2>1. Aceitação dos Termos</h2>
+    <p>Ao acessar e utilizar a plataforma ForexAI Pro, você concorda com estes Termos de Uso. Se não concordar com qualquer parte destes termos, por favor, não utilize nossos serviços.</p>
+    <p>O ForexAI Pro é uma plataforma de análise de mercado financeiro auxiliada por inteligência artificial, projetada para fornecer insights e dados técnicos. A utilização é de inteira responsabilidade do usuário.</p>
+
+    <h2>2. Natureza do Serviço</h2>
+    <p>O ForexAI Pro fornece:</p>
+    <ul>
+      <li>Análises técnicas baseadas em inteligência artificial</li>
+      <li>Dados de mercado em tempo real de fontes públicas</li>
+      <li>Detecção de padrões como Smart Money Concepts (SMC), Price Action e estratégias híbridas</li>
+      <li>Pontos de entrada, stop loss e take profit sugeridos pela IA</li>
+      <li>Análise de sentimento de mercado baseada em notícias</li>
+    </ul>
+    <p><strong>Importante:</strong> As análises fornecidas são geradas por inteligência artificial e constituem ferramentas auxiliares de decisão. Elas NÃO constituem recomendações de investimento, consultoria financeira ou aconselhamento profissional.</p>
+
+    <h2>3. Isenção de Responsabilidade Financeira</h2>
+    <p>O ForexAI Pro NÃO se responsabiliza por:</p>
+    <ul>
+      <li>Decisões de investimento tomadas com base nas análises da plataforma</li>
+      <li>Lucros ou perdas resultantes de operações financeiras</li>
+      <li>A precisão absoluta dos dados de mercado (dados sujeitos a atrasos)</li>
+      <li>Resultados passados como garantia de resultados futuros</li>
+    </ul>
+    <p>Toda operação no mercado financeiro envolve risco. O desempenho anterior não garante resultados futuros. Opere sempre com capital que você pode se permitir perder.</p>
+
+    <h2>4. Planos e Pagamento</h2>
+    <p>O ForexAI Pro oferece os seguintes planos:</p>
+    <ul>
+      <li><strong>Gratuito:</strong> 100 créditos iniciais (20 análises). Sem custo.</li>
+      <li><strong>Pro Mensal:</strong> R$ 49,90/mês — créditos ilimitados, todas as funcionalidades.</li>
+      <li><strong>Pro Anual:</strong> R$ 479,00/ano — créditos ilimitados, todas as funcionalidades, economia de 20%.</li>
+    </ul>
+    <p>Os pagamentos são processados de forma segura via Stripe. A assinatura é renovada automaticamente ao final de cada período, salvo cancelamento pelo usuário.</p>
+
+    <h2>5. Cancelamento e Reembolso</h2>
+    <p>Você pode cancelar sua assinatura a qualquer momento. Após o cancelamento:</p>
+    <ul>
+      <li>Você manterá acesso aos recursos Pro até o final do período já pago</li>
+      <li>Não haverá cobranças futuras após o cancelamento</li>
+      <li>Reembolsos podem ser solicitados em até 7 dias após a cobrança</li>
+    </ul>
+    <p>Para cancelar, entre em contato conosco ou acesse as configurações da sua conta.</p>
+
+    <h2>6. Uso Aceitável</h2>
+    <p>Ao utilizar o ForexAI Pro, você se compromete a:</p>
+    <ul>
+      <li>Não utilizar a plataforma para atividades ilegais</li>
+      <li>Não redistribuir ou revender as análises sem autorização</li>
+      <li>Não tentar acessar o sistema de forma não autorizada</li>
+      <li>Não utilizar robôs ou scrapers para extrair dados em massa</li>
+      <li>Não criar múltiplas contas para obter créditos gratuitos adicionais</li>
+    </ul>
+
+    <h2>7. Propriedade Intelectual</h2>
+    <p>Todo o conteúdo, algoritmos, design e código do ForexAI Pro são de propriedade exclusiva da plataforma. A reprodução, distribuição ou modificação sem autorização é proibida.</p>
+    <p>As análises geradas são licenciadas para uso pessoal do assinante e não devem ser comercializadas ou redistribuídas.</p>
+
+    <h2>8. Limitação de Responsabilidade</h2>
+    <p>Em nenhuma circunstância o ForexAI Pro será responsável por danos diretos, indiretos, incidentais ou consequenciais decorrentes do uso ou impossibilidade de uso da plataforma, incluindo, mas não limitado a, perdas financeiras.</p>
+
+    <h2>9. Modificações nos Termos</h2>
+    <p>Reservamo-nos o direito de modificar estes Termos de Uso a qualquer momento. As alterações serão comunicadas por e-mail ou notificação na plataforma. O uso continuado após as modificações constitui aceitação dos novos termos.</p>
+
+    <h2>10. Lei Aplicável</h2>
+    <p>Estes termos são regidos pelas leis da República Federativa do Brasil. Qualquer disputa será submetida ao foro da comarca do usuário, com exclusão de qualquer outro.</p>
+
+    <h2>11. Contato</h2>
+    <p>Para dúvidas sobre estes Termos de Uso, entre em contato pelo e-mail: <strong>contato@forexaipro.com.br</strong></p>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-logo"><span>ForexAI Pro</span> © 2025</div>
+  <div class="footer-links">
+    <a href="/">Início</a>
+    <a href="/#faq">FAQ</a>
+    <a href="/#depoimentos">Depoimentos</a>
+    <a href="/privacidade">Privacidade</a>
+  </div>
+  <div class="footer-made">Feito com 🧠 AI no Brasil 🇧🇷</div>
+</footer>
+
+</body>
+</html>

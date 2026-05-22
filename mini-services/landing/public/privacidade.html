@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Política de Privacidade — ForexAI Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #0a0a0f;
+  --bg-light: #12121a;
+  --green: #00ff88;
+  --green-dim: #00cc6a;
+  --green-glow: rgba(0,255,136,0.3);
+  --gold: #ffd700;
+  --text: #e0e0e0;
+  --text-dim: #888;
+  --text-bright: #ffffff;
+  --border: rgba(255,255,255,0.1);
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+a { color: var(--green); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.container { max-width: 800px; margin: 0 auto; padding: 0 1.5rem; }
+
+.page-header {
+  padding: 6rem 1.5rem 3rem;
+  text-align: center;
+  position: relative;
+}
+.page-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--green), var(--gold));
+  border-radius: 2px;
+}
+.page-header h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--green), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+.page-header p { color: var(--text-dim); font-size: 0.95rem; }
+
+.content {
+  padding: 3rem 1.5rem 5rem;
+}
+.content h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-bright);
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  padding-left: 1rem;
+  border-left: 3px solid var(--green);
+}
+.content h2:first-child { margin-top: 0; }
+.content p {
+  margin-bottom: 1rem;
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+.content ul {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+  list-style: none;
+}
+.content ul li {
+  position: relative;
+  padding-left: 1.25rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+.content ul li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--green);
+  font-weight: 700;
+}
+
+.footer {
+  padding: 2rem 1.5rem;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+.footer-logo { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.75rem; }
+.footer-logo span {
+  background: linear-gradient(135deg, var(--green), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.footer-links a { font-size: 0.85rem; color: var(--text-dim); transition: color 0.3s ease; }
+.footer-links a:hover { color: var(--green); text-decoration: none; }
+.footer-made { font-size: 0.85rem; color: var(--text-dim); }
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  padding: 0.6rem 1.25rem;
+  background: rgba(0,255,136,0.1);
+  border: 1px solid rgba(0,255,136,0.2);
+  border-radius: 8px;
+  color: var(--green);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+.back-link:hover { background: rgba(0,255,136,0.15); text-decoration: none; }
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+
+@media (max-width: 768px) {
+  .content h2 { font-size: 1.2rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="container">
+    <h1>Política de Privacidade</h1>
+    <p>Última atualização: Maio de 2025</p>
+  </div>
+</div>
+
+<div class="content">
+  <div class="container">
+    <a href="/" class="back-link">← Voltar ao Início</a>
+
+    <h2>1. Introdução</h2>
+    <p>O ForexAI Pro valoriza a privacidade dos seus usuários. Esta Política de Privacidade descreve como coletamos, usamos, armazenamos e protegemos suas informações pessoais quando você utiliza nossa plataforma.</p>
+    <p>Ao utilizar o ForexAI Pro, você consente com as práticas descritas nesta política.</p>
+
+    <h2>2. Dados que Coletamos</h2>
+    <p>Coletamos os seguintes tipos de informações:</p>
+    <ul>
+      <li><strong>Dados de cadastro:</strong> Nome, endereço de e-mail e foto de perfil (fornecidos via Google OAuth)</li>
+      <li><strong>Dados de uso:</strong> Histórico de análises realizadas, instrumentos consultados, preferências de estratégia</li>
+      <li><strong>Dados de pagamento:</strong> Informações de transação processadas pelo Stripe (não armazenamos dados de cartão)</li>
+      <li><strong>Dados técnicos:</strong> Endereço IP, tipo de navegador, sistema operacional, dados de acesso</li>
+      <li><strong>Cookies:</strong> Cookies de sessão para autenticação e preferências do usuário</li>
+    </ul>
+
+    <h2>3. Como Usamos seus Dados</h2>
+    <p>Utilizamos suas informações para:</p>
+    <ul>
+      <li>Fornecer e melhorar o serviço de análise AI</li>
+      <li>Autenticar sua conta e manter a segurança</li>
+      <li>Processar pagamentos e gerenciar assinaturas</li>
+      <li>Personalizar a experiência na plataforma</li>
+      <li>Enviar notificações relevantes sobre o serviço</li>
+      <li>Cumprir obrigações legais e regulatórias</li>
+    </ul>
+
+    <h2>4. Base Legal para Processamento</h2>
+    <p>O processamento dos seus dados é baseado em:</p>
+    <ul>
+      <li><strong>Consentimento:</strong> Quando você autoriza o uso de dados via cadastro e configurações</li>
+      <li><strong>Execução de contrato:</strong> Para fornecer os serviços contratados</li>
+      <li><strong>Interesse legítimo:</strong> Para melhorar nossos serviços e segurança</li>
+      <li><strong>Obrigação legal:</strong> Para cumprir requisitos regulatórios</li>
+    </ul>
+    <p>Em conformidade com a Lei Geral de Proteção de Dados (LGPD — Lei nº 13.709/2018).</p>
+
+    <h2>5. Compartilhamento de Dados</h2>
+    <p>Seus dados podem ser compartilhados com:</p>
+    <ul>
+      <li><strong>Google:</strong> Para autenticação via OAuth (nome, e-mail, foto)</li>
+      <li><strong>Stripe:</strong> Para processamento seguro de pagamentos</li>
+      <li><strong>Supabase:</strong> Para armazenamento seguro em banco de dados criptografado</li>
+      <li><strong>Autoridades legais:</strong> Quando exigido por lei ou ordem judicial</li>
+    </ul>
+    <p><strong>Não vendemos, alugamos ou compartilhamos seus dados pessoais com terceiros para fins de marketing.</strong></p>
+
+    <h2>6. Armazenamento e Segurança</h2>
+    <p>Seus dados são armazenados de forma segura com as seguintes medidas:</p>
+    <ul>
+      <li>Comunicação criptografada via HTTPS/TLS</li>
+      <li>Banco de dados com criptografia em repouso</li>
+      <li>Autenticação via provedores seguros (Google OAuth)</li>
+      <li>Acesso restrito a dados pessoais apenas quando necessário</li>
+      <li>Monitoramento contínuo de segurança</li>
+    </ul>
+    <p>Os dados são armazenados em servidores localizados nos Estados Unidos (Supabase/Stripe). Retemos seus dados enquanto sua conta estiver ativa ou conforme necessário para cumprir obrigações legais.</p>
+
+    <h2>7. Seus Direitos (LGPD)</h2>
+    <p>Como titular dos dados, você tem direito a:</p>
+    <ul>
+      <li><strong>Acesso:</strong> Solicitar cópia dos seus dados pessoais</li>
+      <li><strong>Retificação:</strong> Corrigir dados incorretos ou incompletos</li>
+      <li><strong>Exclusão:</strong> Solicitar a exclusão dos seus dados pessoais</li>
+      <li><strong>Portabilidade:</strong> Receber seus dados em formato estruturado</li>
+      <li><strong>Revogação do consentimento:</strong> Retirar seu consentimento a qualquer momento</li>
+      <li><strong>Oposição:</strong> Opor-se ao processamento em determinadas circunstâncias</li>
+    </ul>
+    <p>Para exercer qualquer direito, entre em contato conosco pelo e-mail abaixo.</p>
+
+    <h2>8. Cookies e Rastreamento</h2>
+    <p>Utilizamos cookies para:</p>
+    <ul>
+      <li>Manter sua sessão autenticada</li>
+      <li>Armazenar preferências de tema e configurações</li>
+      <li>Garantir o funcionamento seguro da plataforma</li>
+    </ul>
+    <p>Não utilizamos cookies de rastreamento de terceiros ou publicidade direcionada.</p>
+
+    <h2>9. Dados de Menores</h2>
+    <p>O ForexAI Pro não é destinado a menores de 18 anos. Não coletamos intencionalmente dados de menores. Se tomarmos conhecimento de que coletamos dados de um menor, eles serão excluídos imediatamente.</p>
+
+    <h2>10. Alterações nesta Política</h2>
+    <p>Podemos atualizar esta Política de Privacidade periodicamente. Notificaremos você sobre alterações significativas por e-mail ou aviso na plataforma. A data da última atualização será sempre indicada no topo desta página.</p>
+
+    <h2>11. Contato</h2>
+    <p>Para dúvidas, solicitações ou reclamações sobre privacidade e proteção de dados, entre em contato:</p>
+    <p><strong>E-mail:</strong> contato@forexaipro.com.br</p>
+    <p>Responderemos às solicitações de direitos do titular no prazo de 15 dias úteis, conforme exigido pela LGPD.</p>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-logo"><span>ForexAI Pro</span> © 2025</div>
+  <div class="footer-links">
+    <a href="/">Início</a>
+    <a href="/#faq">FAQ</a>
+    <a href="/#depoimentos">Depoimentos</a>
+    <a href="/termos">Termos de Uso</a>
+  </div>
+  <div class="footer-made">Feito com 🧠 AI no Brasil 🇧🇷</div>
+</footer>
+
+</body>
+</html>
