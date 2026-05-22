@@ -65,3 +65,4 @@ export function userRowToApp(row: UserRow) {
     isPro: row.is_pro,
   };
 }
+// env fix trigger 1779436138
